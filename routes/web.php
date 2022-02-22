@@ -19,9 +19,10 @@ Route::get('/', function () {
 Route::get('/index', function () {
     return view('index');
 });
-Route::get('/admin/users', function () {
-    return view('index');
-});
+
 Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+/***BACKEND ROUTES ***/
+
+Route::resource('admin/users', App\Http\Controllers\AdminUsersController::class);
