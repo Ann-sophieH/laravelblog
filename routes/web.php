@@ -22,7 +22,17 @@ Route::get('/index', function () {
 
 Auth::routes();
 
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-/***BACKEND ROUTES ***/
 
-Route::resource('admin/users', App\Http\Controllers\AdminUsersController::class);
+/***BACKEND ROUTES ***/
+//
+/*
+Route::middleware(['auth'])->group(function (){
+    //Route::resource('admin/users', App\Http\Controllers\AdminUsersController::class); 1 per 1 beveiligen
+
+});
+*/ //als de prefix = admin is dan gaan we er middleware aan koppelen => alles onder admin beveiligd
+Route::group(['prefix'=>'admin', 'middleware'=>'auth'], function (){
+
+    Route::get('', [App\Http\Controllers\HomeController::class, 'index'])->name('homebackend');
+    Route::resource('users', App\Http\Controllers\AdminUsersController::class);
+});

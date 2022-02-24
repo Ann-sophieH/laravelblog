@@ -12,13 +12,16 @@ class AdminUsersController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    public function __construct(){
+        $this->middleware('auth'); //beveiliging
+    }
     public function index()
     {
-        //$users = User::all()->orderBy('name'); //eloquent schrijven 'proper'
-        $users =User::where('is_active', 1);
+        $users = User::all();   //->orderBy('name'); //eloquent schrijven 'proper'
+        //$users =User::where('is_active', 1);
         //dd($users);
         //return view('admin.users.index', ['users'=>$users]); 2 schrijfwijzen
-        return view('admin.users.index', compact('users'));
+        return view('admin.users.index', compact('users')); //compact draagt assoc array over
     }
 
     /**
@@ -29,6 +32,7 @@ class AdminUsersController extends Controller
     public function create()
     {
         //
+        return view( 'admin.users.create');
     }
 
     /**
