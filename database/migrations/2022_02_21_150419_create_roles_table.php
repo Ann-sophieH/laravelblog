@@ -18,6 +18,17 @@ return new class extends Migration
             $table->string('name');
             $table->timestamps();
         });
+        Schema::create('user_role', function (Blueprint $table){
+            $table->id();
+            $table->unsignedBigInteger('user_id'); //= samentrekking tabel (enkelvoud) en zijn id
+            $table->unsignedBigInteger('role_id');
+            $table->timestamps();
+            $table->unique(['user_id' , 'role_id']);
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+                //user_id refereert naar id op tabel users en bij delete van user moet relatie ook deleted worden
+            $table->foreign('role_id')->references('id')->on('roles')->onDelete('cascade');
+
+        });
     }
 
     /**

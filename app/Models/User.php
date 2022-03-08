@@ -18,7 +18,7 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'role_id',
+        //'role_id',
         'is_active',
         'name',
         'email',
@@ -44,7 +44,7 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
-    public function role(){
-        $this->belongsTo(Role::class); //eloquent model: deze user hooort bij die rol 1 op veel
+    public function roles(){
+       return $this->belongsToMany(Role::class, 'user_role'); //eloquent model: deze user hooort bij die rol 1 op veel
     }
 }

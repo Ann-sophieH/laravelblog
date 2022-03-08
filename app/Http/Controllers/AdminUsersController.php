@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UsersRequest;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
-class AdminUsersController extends Controller
-{
+class AdminUsersController extends Controller{
     /**
      * Display a listing of the resource.
      *
@@ -17,7 +20,10 @@ class AdminUsersController extends Controller
     }
     public function index()
     {
-        $users = User::all();   //->orderBy('name'); //eloquent schrijven 'proper'
+        $users = User::orderBy('id', 'desc')->paginate(20);
+
+       // $users = User::all();   //->orderBy('name'); //eloquent schrijven 'proper'(eloquent)MODEL
+      // $users = DB::table('users')->get(); //rechtstreekse SQL: database docs(querybuilder)VIA DB FACADE ARRAYNIVEAU
         //$users =User::where('is_active', 1);
         //dd($users);
         //return view('admin.users.index', ['users'=>$users]); 2 schrijfwijzen
@@ -32,7 +38,8 @@ class AdminUsersController extends Controller
     public function create()
     {
         //
-        return view( 'admin.users.create');
+        $roles = Role::pluck('name', 'id')->all();  //in form alle rollen laten weergeven
+        return view( 'admin.users.create', compact('roles'));
     }
 
     /**
@@ -41,9 +48,28 @@ class AdminUsersController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(UsersRequest $request)
     {
-        //
+
+        //verbonden met create (create = weergave, store = wegschrijven
+       /* User::create([
+            'name'=>$request['name'],
+            'email'=>$request['email'],
+            'password'=>Hash::make($request['password']),
+            'role_id'=>$request['roles[]'],
+            'is_active'=>$request['is_active']
+        ]);*/
+        $user = new User();
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->password = Hash::make($request['password']);
+        $user->is_active = $request->is_active;
+        $user->save();
+
+        $user->roles()->sync($request->roles,false);
+
+
+        return redirect('/admin/users');
     }
 
     /**
