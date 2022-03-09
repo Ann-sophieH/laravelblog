@@ -1,7 +1,8 @@
 @extends('layouts.admin')
 @section('content')
-    <h1>Users</h1>
-    <table class="table  table-striped">
+    <h1 class="col-10">Users</h1>
+    <div class="btn btn-info col-2 " href=""><i class="fa fa-user-plus"></i> add new user  </div>
+    <table class="table  table-striped mt-5">
         <thead>
         <tr>
             <th>Id</th>
@@ -18,7 +19,9 @@
         @foreach($users as $user)
         <tr>
             <td>{{$user->id}}</td>
-            <td>{{$user->photo_id}}</td>
+            <td>
+                <img height="62" src="{{$user->photo ? asset($user->photo->file) : 'http://via.placeholder.com/62x62'}}" alt="{{$user->name}}">
+            </td>
             <td>{{$user->name}}</td>
             <td>{{$user->email}}</td>
             <td>

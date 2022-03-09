@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UsersEditRequest;
 use App\Http\Requests\UsersRequest;
+use App\Models\Photo;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -50,7 +52,6 @@ class AdminUsersController extends Controller{
      */
     public function store(UsersRequest $request)
     {
-
         //verbonden met create (create = weergave, store = wegschrijven
        /* User::create([
             'name'=>$request['name'],
@@ -64,6 +65,14 @@ class AdminUsersController extends Controller{
         $user->email = $request->email;
         $user->password = Hash::make($request['password']);
         $user->is_active = $request->is_active;
+        /**code opslaan foto**/
+        if($file = $request->file('photo_id')){
+            $name = time() . $file->getClientOriginalName() ;//ophalen bestandsnaam en datum toevoegen
+            $file->move('img', $name); //lokaal opslaan in map images
+            //verbinden DB :
+            $photo = Photo::create(['file'=>$name]); //schrijft weg naar tabel en slaat op in $photo
+            $user->photo_id =$photo->id; //halen id uit $photo en steken die in veld phot_id van users tabel
+        }
         $user->save();
 
         $user->roles()->sync($request->roles,false);
@@ -92,6 +101,10 @@ class AdminUsersController extends Controller{
     public function edit($id)
     {
         //
+        $user = User::findOrFail($id);// enkel find nie genoeg hier ook errorhandling 404page
+
+        $roles = Role::pluck('name', 'id')->all(); //eerst veldnamen dan pas id
+        return view('admin.users.edit', compact('user', 'roles'));
     }
 
     /**
@@ -101,9 +114,31 @@ class AdminUsersController extends Controller{
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(UsersEditRequest $request, $id)
     {
-        //
+        //request = alle velden die gepathced moeten worden, id meegegven in edit page zelf in array
+        $user = User::findOrFail($id);
+        if(trim($request->password)==''){
+            $input= $request->except('password');
+        }else{
+            $input = $request->all;
+            $input['password'] = Hash::make($request['password']);
+        }
+        /**code overschrijven  foto**/
+        if($file = $request->file('photo_id')){
+            $name = time() . $file->getClientOriginalName() ;//ophalen bestandsnaam en datum toevoegen
+            $file->move('img', $name); //lokaal opslaan in map images
+            //verbinden DB :
+            $photo = Photo::create(['file'=>$name]); //schrijft weg naar tabel en slaat op in $photo
+
+            $user->photo_id = $input['photo_id'] = $photo->id ; //id ophalen
+
+        }
+            $user->update($input);
+        /**wegschrijven tsstabel met nieuwe rollen **/
+        $user->roles()->sync($request->roles, true);
+        return redirect('admin/users');
+        // return redirect->back();
     }
 
     /**
@@ -114,6 +149,8 @@ class AdminUsersController extends Controller{
      */
     public function destroy($id)
     {
-        //
+        //user id meegeven in form
+        User::findOrFail($id)->delete(); //HARD DELETE: nooit doen
+        return redirect('/admin/users');
     }
 }

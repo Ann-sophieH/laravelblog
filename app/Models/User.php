@@ -47,4 +47,7 @@ class User extends Authenticatable
     public function roles(){
        return $this->belongsToMany(Role::class, 'user_role'); //eloquent model: deze user hooort bij die rol 1 op veel
     }
+    public function photo(){
+        return $this->belongsTo(Photo::class );
+    }
 }
